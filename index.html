@@ -23,86 +23,88 @@
             overflow-x: hidden;
         }
 
-        /* --- Six Eyes Visuals --- */
-        #six-eyes-trail {
+        /* --- Overlays --- */
+        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 6000; display: none; background: black; }
+        #domain-video { width: 100%; height: 100%; object-fit: cover; }
+
+        #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 5000;
-        }
-        .energy-particle {
-            position: absolute; width: 8px; height: 8px;
-            background: var(--gojo-blue); border-radius: 50%;
-            box-shadow: 0 0 10px var(--gojo-blue);
-            opacity: 1; transition: transform 0.5s ease, opacity 0.5s ease;
+            background: black; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        /* --- Black Flash Mini-Game --- */
-        #black-flash-zone {
-            border: 2px solid var(--accent-red); padding: 15px;
-            margin: 20px 0; text-align: center; background: rgba(0,0,0,0.8);
+        #weak-text { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--accent-red); font-size: 4rem; font-weight: 900;
+            display: none; animation: pulsate 0.4s infinite; z-index: 10005; pointer-events: none;
         }
-        .flash-target {
-            width: 60px; height: 60px; border-radius: 50%;
-            margin: 10px auto; background: white;
-            animation: pulseTarget 1s infinite alternate;
-            cursor: pointer;
-        }
-        @keyframes pulseTarget { from { transform: scale(0.8); } to { transform: scale(1.2); } }
-        .black-flash-active { animation: blackFlashAnim 0.3s forwards; }
-        @keyframes blackFlashAnim { 0% { background: white; } 100% { background: black; box-shadow: 0 0 40px var(--accent-red); } }
+        @keyframes pulsate { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); filter: blur(2px); } }
 
-        /* --- Binding Vow Guestbook --- */
-        #binding-vow-section {
-            border: 2px dashed var(--terminal-green); padding: 15px;
-            margin: 20px 0; background: rgba(0,255,65,0.05);
-        }
-        #vow-status { color: var(--accent-red); font-weight: bold; }
+        .emoji { position: fixed; top: -50px; font-size: 2rem; animation: fall linear forwards; z-index: 10002; }
+        @keyframes fall { to { transform: translateY(110vh); } }
 
-        /* --- UI Components --- */
+        /* --- Six Eyes Trail --- */
+        #six-eyes-trail { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; }
+        .energy-particle { position: absolute; width: 10px; height: 10px; background: var(--gojo-blue); border-radius: 50%; box-shadow: 0 0 15px var(--gojo-blue); opacity: 1; transition: transform 0.4s ease, opacity 0.4s ease; }
+
+        /* --- Main Content --- */
         #main-content {
             display: none; padding: 15px 15px 240px 15px;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('1000101960.jpg');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('1000101960.jpg');
             background-size: cover; background-position: center; background-attachment: fixed;
+            min-height: 100vh;
         }
-        .music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10,10,10,0.98); border-top: 2px solid var(--aura-color); padding: 15px; text-align: center; z-index: 100; }
-        .music-btn { background: none; border: 1px solid var(--aura-color); color: var(--aura-color); padding: 8px 12px; margin: 5px; cursor: pointer; }
-        .profile-container { text-align: center; border: 2px solid var(--aura-color); padding: 20px; background: rgba(0,0,0,0.9); }
-        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; display: none; background: black; }
-        #domain-video { width: 100%; height: 100%; object-fit: cover; }
+
+        .profile-container { text-align: center; border: 2px solid var(--aura-color); padding: 20px; background: rgba(0,0,0,0.9); box-shadow: 0 0 15px var(--aura-color); }
+        .main-photo { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--aura-color); object-fit: cover; }
+
+        /* --- Minigames & Vows --- */
+        .module-box { border: 1px solid var(--aura-color); padding: 15px; margin: 20px 0; background: rgba(0,0,0,0.85); text-align: center; }
+        .flash-target { width: 50px; height: 50px; border-radius: 50%; margin: 10px auto; background: white; animation: pulse 1s infinite alternate; cursor: pointer; }
+        @keyframes pulse { from { transform: scale(0.7); } to { transform: scale(1.1); } }
+
+        .music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.98); border-top: 2px solid var(--aura-color); padding: 15px; text-align: center; z-index: 100; }
+        .music-btn { background: none; border: 1px solid var(--aura-color); color: var(--aura-color); padding: 8px 12px; margin: 5px; cursor: pointer; font-family: inherit; font-size: 0.7rem; }
     </style>
 </head>
-<body onmousemove="createSixEyesTrail(event)" ontouchmove="createSixEyesTrail(event.touches[0])">
+<body onmousemove="createTrail(event)" ontouchmove="createTrail(event.touches[0])">
 
     <div id="video-overlay"><video id="domain-video" src="domain_expansion.mp4"></video></div>
     <div id="six-eyes-trail"></div>
 
-    <div id="intro-screen" style="position:fixed; width:100%; height:100%; background:black; z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-        <button class="music-btn" onclick="selectWinner()">INTERESTED</button>
+    <div id="intro-screen">
+        <h2 style="margin-bottom: 30px; letter-spacing: 2px;">AUTHENTICATE SORCERER</h2>
+        <div style="display: flex; gap: 20px;">
+            <button class="music-btn" style="border: 2px solid var(--accent-purple); font-size: 1rem;" onclick="selectWinner()">INTERESTED</button>
+            <button class="music-btn" id="btn-not-interested" style="border: 2px solid var(--accent-red); font-size: 1rem;" onclick="selectWeak()">NOT INTERESTED</button>
+        </div>
+        <div id="weak-text">YOU WEAK</div>
     </div>
 
     <div id="main-content">
-        <div class="profile-container">
-            <img src="Snapchat-1445956652.jpg" style="width:140px; height:140px; border-radius:50%; border:3px solid var(--aura-color); object-fit:cover;">
-            <h1>SORCERER: TANISH</h1>
-            <p id="timer">SYNCHRONIZING...</p>
+        <div class="profile-container" id="aura-container">
+            <img src="Snapchat-1445956652.jpg" class="main-photo" alt="Tanish">
+            <h1 style="margin: 10px 0;">SORCERER: TANISH</h1>
+            <p id="timer" style="color: var(--terminal-green); font-weight: bold;">SYNCHRONIZING...</p>
+            <p id="assigned-char" style="color: var(--aura-color); font-weight: bold; font-size: 0.8rem;">DESIGNATION: SATORU GOJO</p>
         </div>
 
-        <div id="black-flash-zone">
+        <div class="module-box">
             <h3>BLACK FLASH TRAINING</h3>
-            <p>Tap when target is at maximum size!</p>
-            <div id="target" class="flash-target" onclick="checkBlackFlash()"></div>
+            <div id="target" class="flash-target" onclick="checkFlash()"></div>
             <p id="score-display">DIVERGENT FISTS: 0</p>
         </div>
 
-        <div id="binding-vow-section">
-            <h3>BINDING VOW: THE SEALED ARCHIVE</h3>
-            <p id="vow-status">SEALED UNTIL JULY 12, 2026</p>
-            <textarea id="vow-input" placeholder="Type a message to seal..." style="width:90%; background:#000; color:#fff; border:1px solid #00ff41; padding:10px;"></textarea>
-            <button class="music-btn" onclick="sealMessage()">SEAL MESSAGE 📜</button>
+        <div class="module-box" style="border-style: dashed;">
+            <h3>BINDING VOW</h3>
+            <p style="font-size: 0.7rem; color: var(--accent-red);">SEALED UNTIL JULY 12, 2026</p>
+            <input type="text" id="vow-input" placeholder="Type secret message..." style="width: 80%; background: #000; color: #fff; border: 1px solid var(--terminal-green); padding: 8px;">
         </div>
 
         <div class="music-player">
+            <div id="track-label" style="font-size: 0.6rem; margin-bottom: 5px;">BGM: JUDAS (GOJO VS SUKUNA)</div>
             <button class="music-btn" onclick="nextSong()">NEXT TRACK ⏩</button>
-            <button class="music-btn" style="background:var(--aura-color); color:black;" onclick="playVideo()">DOMAIN EXPANSION</button>
+            <button class="music-btn" style="background: var(--aura-color); color: black;" onclick="playDomainVideo()">DOMAIN EXPANSION 🌌</button>
         </div>
     </div>
 
@@ -110,7 +112,15 @@
 
     <script>
         const targetDate = new Date("July 12, 2026 00:00:00").getTime();
-        let score = 0;
+        const songs = [
+            { name: "JUDAS (GOJO VS SUKUNA)", file: "Lady Gaga - Judas - GOJO VS SUKUNA.mp3" },
+            { name: "AIZO", file: "01. AIZO 「www.kazvampires.com」 (online-audio-converter.com).mp3" },
+            { name: "TUCA DONKA", file: "TUCA DONKA - CURSEDEVIL, DJ FKU, Skorde.mp3" },
+            { name: "SPECIALZ", file: "SPECIALZ Song of King Gnu . 2023.mp3" }
+        ];
+        const sorcerers = [{name:"SATORU GOJO", color:"#9d4edd"}, {name:"RYOMEN SUKUNA", color:"#ff002b"}, {name:"TOJI FUSHIGURO", color:"#444444"}];
+        
+        let currentIdx = 0, charIdx = 0, weakScale = 1.0, score = 0;
 
         function selectWinner() {
             document.getElementById('intro-screen').style.display = 'none';
@@ -119,54 +129,51 @@
             setInterval(updateTimer, 1000);
         }
 
-        function createSixEyesTrail(e) {
-            const particle = document.createElement('div');
-            particle.className = 'energy-particle';
-            particle.style.left = e.clientX + 'px';
-            particle.style.top = e.clientY + 'px';
-            document.getElementById('six-eyes-trail').appendChild(particle);
-            setTimeout(() => { particle.style.transform = 'scale(0)'; particle.style.opacity = '0'; }, 50);
-            setTimeout(() => particle.remove(), 600);
-        }
-
-        function checkBlackFlash() {
-            const target = document.getElementById('target');
-            target.classList.add('black-flash-active');
-            score++;
-            document.getElementById('score-display').innerText = `BLACK FLASHES: ${score}`;
-            document.body.style.filter = "invert(1)";
-            setTimeout(() => { 
-                document.body.style.filter = "invert(0)"; 
-                target.classList.remove('black-flash-active');
-            }, 200);
-        }
-
-        function sealMessage() {
-            const input = document.getElementById('vow-input');
-            if(input.value) {
-                alert("Binding Vow established. Message sealed until July 12.");
-                input.value = "";
+        function selectWeak() {
+            weakScale *= 0.7;
+            document.getElementById('btn-not-interested').style.transform = `scale(${weakScale})`;
+            document.getElementById('weak-text').style.display = 'block';
+            for(let i=0; i<10; i++) {
+                const e = document.createElement('div'); e.className = 'emoji'; e.innerText = '😠';
+                e.style.left = Math.random() * 100 + 'vw'; e.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                document.body.appendChild(e); setTimeout(() => e.remove(), 2500);
             }
         }
 
-        function updateTimer() {
-            const now = new Date().getTime();
-            const diff = targetDate - now;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("timer").innerHTML = days + "d remaining until Deployment";
+        function createTrail(e) {
+            const p = document.createElement('div'); p.className = 'energy-particle';
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.getElementById('six-eyes-trail').appendChild(p);
+            setTimeout(() => { p.style.transform = 'scale(0)'; p.style.opacity = '0'; }, 50);
+            setTimeout(() => p.remove(), 500);
         }
 
-        function playVideo() {
-            const overlay = document.getElementById('video-overlay');
-            const video = document.getElementById('domain-video');
-            overlay.style.display = 'block';
-            video.play();
-            video.onended = () => overlay.style.display = 'none';
+        function checkFlash() {
+            score++; document.getElementById('score-display').innerText = `BLACK FLASHES: ${score}`;
+            document.body.style.filter = "invert(1)"; setTimeout(() => document.body.style.filter = "none", 150);
         }
 
         function nextSong() {
-            // Placeholder for song logic from previous build
-            alert("Switching Sorcerer Aura...");
+            currentIdx = (currentIdx + 1) % songs.length;
+            charIdx = (charIdx + 1) % sorcerers.length;
+            const audio = document.getElementById('bg-music');
+            audio.src = songs[currentIdx].file; audio.play();
+            document.getElementById('track-label').innerText = "BGM: " + songs[currentIdx].name;
+            const char = sorcerers[charIdx];
+            document.getElementById('assigned-char').innerText = "DESIGNATION: " + char.name;
+            document.documentElement.style.setProperty('--aura-color', char.color);
+        }
+
+        function playDomainVideo() {
+            const overlay = document.getElementById('video-overlay'), video = document.getElementById('domain-video'), audio = document.getElementById('bg-music');
+            audio.pause(); overlay.style.display = 'block'; video.play();
+            video.onended = () => { overlay.style.display = 'none'; audio.play(); };
+        }
+
+        function updateTimer() {
+            const diff = targetDate - new Date().getTime();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById("timer").innerHTML = days + "d remaining until Deployment";
         }
     </script>
 </body>
