@@ -1,116 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gojo Archive | Community</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
-    <style>
-        /* ADD YOUR CSS HERE OR LINK TO YOUR CSS FILE */
-        body { background: #000; color: white; font-family: sans-serif; text-align: center; }
-        .mission-archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 20px; }
-        .memory-card img { width: 100%; border-radius: 8px; filter: blur(10px); transition: 0.5s; cursor: pointer; }
-        .memory-card img.reveal { filter: blur(0px); }
-        .upload-section { margin: 20px; padding: 20px; border: 1px solid #333; }
-    </style>
-</head>
 <body>
-
-    <h1>🧿 GOJO ARCHIVE</h1>
-
-    <div class="upload-section">
-        <input type="file" id="imageInput" accept="image/*">
-        <button onclick="handleUpload()">Upload Memory</button>
-        <p id="uploadStatus"></p>
-    </div>
-
-    <div class="mission-archive-grid" id="gallery">
+    <div id="main-ui">
+        <h1>🧿 GOJO ARCHIVE</h1>
+        
+        <div class="profile">
+            <p>SORCERER: TANISH</p>
+            <p id="countdown">140 days until Unsealing</p>
         </div>
 
-    <script>
-        // --- 4. FIREBASE CONFIGURATION ---
-        // REPLACE THESE with your actual keys from Firebase Console
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "gojo-archive.firebaseapp.com",
-            projectId: "gojo-archive",
-            storageBucket: "gojo-archive.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
-        };
+        <button class="minor-btn" onclick="toggleInterest(false)">NOT INTERESTED</button>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        <hr>
 
-        // --- 5. THE BADGE MACHINE (Authentication) ---
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                auth.signInAnonymously()
-                    .then(() => console.log("Authenticated: Secret Badge Assigned 🧿"))
-                    .catch((err) => console.error("Auth Error:", err));
-            } else {
-                console.log("Welcome back, Sorcerer:", user.uid);
-            }
-        });
-
-        // --- 6. REAL-TIME GALLERY (The Six Eyes) ---
-        // This listens for new images and updates the page instantly
-        db.collection("memories").orderBy("time", "desc")
-            .onSnapshot((snapshot) => {
-                const gallery = document.getElementById("gallery");
-                gallery.innerHTML = ""; // Clear old list
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const card = `
-                        <div class="memory-card">
-                            <img src="${data.url}" onclick="this.classList.toggle('reveal')" title="Click to reveal">
-                            <p>${new Date(data.time).toLocaleDateString()}</p>
-                        </div>
-                    `;
-                    gallery.innerHTML += card;
-                });
-            });
-
-        // --- 7. UPLOAD LOGIC ---
-        async function handleUpload() {
-            const file = document.getElementById("imageInput").files[0];
-            const status = document.getElementById("uploadStatus");
-
-            if (!file) return alert("Select a file first!");
+        <div id="archive-content">
+            <div class="mission-archive-grid" id="gallery">
+                </div>
             
-            status.innerText = "Expanding Domain... (Uploading)";
+            <div class="btn-group">
+                <button id="audioBtn" onclick="changeAudio()">NEXT TRACK 🎵</button>
+                <button onclick="playDomain()">GOJO VS SUKUNA 🤞</button> 
+                <button class="flash-btn" onclick="triggerBlackFlash()">BLACK FLASH ⚡</button>
+            </div>
+        </div>
+    </div>
 
-            const timestamp = Date.now();
-            const storageRef = storage.ref(`memories/${timestamp}_${file.name}`);
+    <div id="interest-overlay" onclick="toggleInterest(true)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; z-index:9999; justify-content:center; align-items:center; cursor:pointer;">
+        <div style="border: 2px solid #b388ff; padding: 10px 20px;">INTERESTED</div>
+    </div>
 
-            try {
-                // Upload to Storage
-                const snapshot = await storageRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-
-                // Save info to Firestore
-                await db.collection("memories").add({
-                    url: downloadURL,
-                    time: timestamp,
-                    userId: auth.currentUser.uid
-                });
-
-                status.innerText = "Memory Archived Successfully! ✅";
-                document.getElementById("imageInput").value = ""; // Clear input
-            } catch (error) {
-                console.error(error);
-                status.innerText = "Upload failed. Check console. ❌";
+    <script>
+        // --- 1. NOT INTERESTED LOGIC ---
+        function toggleInterest(show) {
+            const ui = document.getElementById('main-ui');
+            const overlay = document.getElementById('interest-overlay');
+            if(show) {
+                ui.style.display = 'block';
+                overlay.style.display = 'none';
+            } else {
+                ui.style.display = 'none';
+                overlay.style.display = 'flex';
             }
         }
+
+        // --- 2. AUDIO CHANGE LOGIC ---
+        // List your track filenames here. Ensure they are in your GitHub folder!
+        const tracks = ["track1.mp3", "track2.mp3", "track3.mp3"]; 
+        let currentIdx = 0;
+        let bgMusic = new Audio(tracks[currentIdx]);
+
+        function changeAudio() {
+            bgMusic.pause();
+            currentIdx = (currentIdx + 1) % tracks.length;
+            bgMusic = new Audio(tracks[currentIdx]);
+            bgMusic.play();
+            console.log("Switching to: " + tracks[currentIdx]);
+        }
+
+        // --- 3. DOMAIN EXPANSION (No filename change) ---
+        function playDomain() {
+            const video = document.getElementById("domainVideo"); // Match your video ID
+            if(video) {
+                video.style.display = "block";
+                video.play();
+            }
+        }
+
+        // --- 4. BLACK FLASH BUTTON ---
+        function triggerBlackFlash() {
+            document.body.classList.add('black-flash-active');
+            // Play a punch/electric sound if you have one
+            setTimeout(() => {
+                document.body.classList.remove('black-flash-active');
+            }, 500);
+        }
     </script>
+
+    <style>
+        /* Black Flash Effect */
+        .black-flash-active {
+            animation: flashShake 0.1s infinite;
+            background-color: #ff0000 !important; /* Red flash */
+        }
+        @keyframes flashShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            50% { transform: translate(-1px, -2px) rotate(-1deg); }
+            100% { transform: translate(1px, 2px) rotate(0deg); }
+        }
+    </style>
 </body>
-</html>
