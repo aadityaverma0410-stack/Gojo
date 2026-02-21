@@ -4,140 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jujutsu High | Archive Tanish</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     <style>
-        :root {
-            --bg-color: #050505;
-            --text-color: #e0e0e0;
-            --accent-purple: #9d4edd;
-            --accent-red: #ff002b;
-            --terminal-green: #00ff41;
-            --gojo-blue: #00d4ff;
-            --aura-color: var(--accent-purple);
-        }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-        }
-
-        /* --- Overlays --- */
-        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 6000; display: none; background: black; }
+        :root { --bg-color: #050505; --text-color: #e0e0e0; --accent-purple: #9d4edd; --accent-red: #ff002b; --terminal-green: #00ff41; --gojo-blue: #00d4ff; --aura-color: var(--accent-purple); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); color: var(--text-color); font-family: 'Courier New', monospace; overflow-x: hidden; }
+        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: none; background: black; }
         #domain-video { width: 100%; height: 100%; object-fit: cover; }
-
-        #intro-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-
-        #weak-text { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: var(--accent-red); font-size: 4rem; font-weight: 900;
-            display: none; animation: pulsate 0.4s infinite; z-index: 10005; pointer-events: none;
-        }
-        @keyframes pulsate { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); filter: blur(2px); } }
-
-        .emoji { position: fixed; top: -50px; font-size: 2rem; animation: fall linear forwards; z-index: 10002; }
-        @keyframes fall { to { transform: translateY(110vh); } }
-
-        /* --- Six Eyes Trail --- */
         #six-eyes-trail { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; }
-        .energy-particle { position: absolute; width: 10px; height: 10px; background: var(--gojo-blue); border-radius: 50%; box-shadow: 0 0 15px var(--gojo-blue); opacity: 1; transition: transform 0.4s ease, opacity 0.4s ease; }
-
-        /* --- Main Content --- */
-        #main-content {
-            display: none; padding: 15px 15px 240px 15px;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('1000101960.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed;
-            min-height: 100vh;
-        }
-
-        .profile-container { text-align: center; border: 2px solid var(--aura-color); padding: 20px; background: rgba(0,0,0,0.9); box-shadow: 0 0 15px var(--aura-color); }
-        .main-photo { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--aura-color); object-fit: cover; }
-
-        /* --- Minigames & Vows --- */
+        .energy-particle { position: absolute; width: 10px; height: 10px; background: var(--gojo-blue); border-radius: 50%; box-shadow: 0 0 15px var(--gojo-blue); transition: transform 0.4s ease, opacity 0.4s ease; }
+        #main-content { display: none; padding: 15px 15px 240px 15px; background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('1000101960.jpg'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; }
         .module-box { border: 1px solid var(--aura-color); padding: 15px; margin: 20px 0; background: rgba(0,0,0,0.85); text-align: center; }
-        .flash-target { width: 50px; height: 50px; border-radius: 50%; margin: 10px auto; background: white; animation: pulse 1s infinite alternate; cursor: pointer; }
-        @keyframes pulse { from { transform: scale(0.7); } to { transform: scale(1.1); } }
-
-        .music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.98); border-top: 2px solid var(--aura-color); padding: 15px; text-align: center; z-index: 100; }
-        .music-btn { background: none; border: 1px solid var(--aura-color); color: var(--aura-color); padding: 8px 12px; margin: 5px; cursor: pointer; font-family: inherit; font-size: 0.7rem; }
+        .mission-archive { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .mission-photo { width: 100%; border-radius: 5px; border: 1px solid var(--aura-color); aspect-ratio: 1/1; object-fit: cover; }
+        .music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10,10,10,0.98); border-top: 2px solid var(--aura-color); padding: 15px; text-align: center; z-index: 100; }
+        .music-btn { background: none; border: 1px solid var(--aura-color); color: var(--aura-color); padding: 8px 12px; margin: 5px; cursor: pointer; font-size: 0.7rem; }
     </style>
 </head>
 <body onmousemove="createTrail(event)" ontouchmove="createTrail(event.touches[0])">
-
     <div id="video-overlay"><video id="domain-video" src="domain_expansion.mp4"></video></div>
     <div id="six-eyes-trail"></div>
-
-    <div id="intro-screen">
-        <h2 style="margin-bottom: 30px; letter-spacing: 2px;">AUTHENTICATE SORCERER</h2>
-        <div style="display: flex; gap: 20px;">
-            <button class="music-btn" style="border: 2px solid var(--accent-purple); font-size: 1rem;" onclick="selectWinner()">INTERESTED</button>
-            <button class="music-btn" id="btn-not-interested" style="border: 2px solid var(--accent-red); font-size: 1rem;" onclick="selectWeak()">NOT INTERESTED</button>
-        </div>
-        <div id="weak-text">YOU WEAK</div>
+    <div id="intro-screen" style="position:fixed;width:100%;height:100%;background:black;z-index:11000;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+        <button class="music-btn" style="font-size:1.5rem;" onclick="startDomain()">INTERESTED</button>
     </div>
-
     <div id="main-content">
-        <div class="profile-container" id="aura-container">
-            <img src="Snapchat-1445956652.jpg" class="main-photo" alt="Tanish">
-            <h1 style="margin: 10px 0;">SORCERER: TANISH</h1>
-            <p id="timer" style="color: var(--terminal-green); font-weight: bold;">SYNCHRONIZING...</p>
-            <p id="assigned-char" style="color: var(--aura-color); font-weight: bold; font-size: 0.8rem;">DESIGNATION: SATORU GOJO</p>
+        <div class="module-box">
+            <img src="Snapchat-1445956652.jpg" style="width:120px;height:120px;border-radius:50%;border:3px solid var(--aura-color); object-fit: cover;">
+            <h1>SORCERER: TANISH</h1>
+            <p id="timer" style="color:var(--terminal-green); font-weight:bold;">SYNCHRONIZING...</p>
         </div>
 
         <div class="module-box">
-            <h3>BLACK FLASH TRAINING</h3>
-            <div id="target" class="flash-target" onclick="checkFlash()"></div>
-            <p id="score-display">DIVERGENT FISTS: 0</p>
+            <h3>MISSION ARCHIVE</h3>
+            <div class="mission-archive">
+                <img src="IMG_20251217_161226926.jpg" class="mission-photo">
+                <img src="IMG_20251018_174718968.jpg" class="mission-photo">
+                <img src="IMG-20251018-WA0075.jpg" class="mission-photo">
+                <img src="IMG-20251018-WA0061.jpg" class="mission-photo">
+                <img src="IMG_20251217_154353312_HDR.jpg" class="mission-photo">
+                <img src="IMG-20251217-WA0338.jpg" class="mission-photo">
+                <img src="IMG-20251218-WA0395.jpg" class="mission-photo">
+                <img src="IMG_20260214_124036_873.jpg" class="mission-photo">
+                <img src="IMG_20260217_114544_290.jpg" class="mission-photo">
+                <img src="IMG-20260216-WA0043.jpg" class="mission-photo">
+                <img src="IMG-20260217-WA0054.jpg" class="mission-photo">
+            </div>
         </div>
 
-        <div class="module-box" style="border-style: dashed;">
-            <h3>BINDING VOW</h3>
-            <p style="font-size: 0.7rem; color: var(--accent-red);">SEALED UNTIL JULY 12, 2026</p>
-            <input type="text" id="vow-input" placeholder="Type secret message..." style="width: 80%; background: #000; color: #fff; border: 1px solid var(--terminal-green); padding: 8px;">
+        <div class="module-box" style="border-color: var(--gojo-blue);">
+            <h3>COMMUNITY MEMORIES 🌀</h3>
+            <input type="file" id="up" style="display:none;" onchange="upload(this)">
+            <button class="music-btn" style="color: var(--gojo-blue); border-color: var(--gojo-blue);" onclick="document.getElementById('up').click()">UPLOAD MEMORY</button>
+            <div id="upload-status" style="font-size:0.6rem;margin-top:10px;"></div>
+            <div id="community-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
         </div>
 
         <div class="music-player">
-            <div id="track-label" style="font-size: 0.6rem; margin-bottom: 5px;">BGM: JUDAS (GOJO VS SUKUNA)</div>
             <button class="music-btn" onclick="nextSong()">NEXT TRACK ⏩</button>
-            <button class="music-btn" style="background: var(--aura-color); color: black;" onclick="playDomainVideo()">DOMAIN EXPANSION 🌌</button>
+            <button class="music-btn" onclick="playDV()">DOMAIN EXPANSION 🌌</button>
         </div>
     </div>
-
     <audio id="bg-music" loop src="Lady Gaga - Judas - GOJO VS SUKUNA.mp3"></audio>
-
     <script>
-        const targetDate = new Date("July 12, 2026 00:00:00").getTime();
-        const songs = [
-            { name: "JUDAS (GOJO VS SUKUNA)", file: "Lady Gaga - Judas - GOJO VS SUKUNA.mp3" },
-            { name: "AIZO", file: "01. AIZO 「www.kazvampires.com」 (online-audio-converter.com).mp3" },
-            { name: "TUCA DONKA", file: "TUCA DONKA - CURSEDEVIL, DJ FKU, Skorde.mp3" },
-            { name: "SPECIALZ", file: "SPECIALZ Song of King Gnu . 2023.mp3" }
-        ];
-        const sorcerers = [{name:"SATORU GOJO", color:"#9d4edd"}, {name:"RYOMEN SUKUNA", color:"#ff002b"}, {name:"TOJI FUSHIGURO", color:"#444444"}];
-        
-        let currentIdx = 0, charIdx = 0, weakScale = 1.0, score = 0;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxJd_atjhj9OqZCqjvWe_35EJH",
+            authDomain: "gojo-archive.firebaseapp.com",
+            projectId: "gojo-archive",
+            storageBucket: "gojo-archive.firebasestorage.app",
+            messagingSenderId: "83853315706",
+            appId: "1:83853315706:web:d881046437197a5c6d36e2"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage(), db = firebase.firestore();
 
-        function selectWinner() {
-            document.getElementById('intro-screen').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            document.getElementById('bg-music').play();
-            setInterval(updateTimer, 1000);
+        function startDomain() { 
+            document.getElementById('intro-screen').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; 
+            document.getElementById('bg-music').play(); 
+            loadMemories(); 
+            setInterval(updateClock, 1000); 
         }
 
-        function selectWeak() {
-            weakScale *= 0.7;
-            document.getElementById('btn-not-interested').style.transform = `scale(${weakScale})`;
-            document.getElementById('weak-text').style.display = 'block';
-            for(let i=0; i<10; i++) {
-                const e = document.createElement('div'); e.className = 'emoji'; e.innerText = '😠';
-                e.style.left = Math.random() * 100 + 'vw'; e.style.animationDuration = (Math.random() * 2 + 1) + 's';
-                document.body.appendChild(e); setTimeout(() => e.remove(), 2500);
-            }
+        async function upload(input) {
+            const file = input.files[0], status = document.getElementById('upload-status');
+            if(!file) return;
+            status.innerText = "SEALING MEMORY...";
+            const ref = storage.ref(`memories/${Date.now()}`);
+            await ref.put(file);
+            const url = await ref.getDownloadURL();
+            await db.collection("memories").add({url: url, time: Date.now()});
+            status.innerText = "SUCCESS! ✅"; loadMemories();
+        }
+
+        async function loadMemories() {
+            const grid = document.getElementById('community-grid'); grid.innerHTML = "";
+            const snap = await db.collection("memories").orderBy("time", "desc").get();
+            snap.forEach(doc => {
+                const img = document.createElement('img');
+                img.src = doc.data().url; img.style.width="100%"; img.style.filter="blur(5px) grayscale(1)";
+                grid.appendChild(img);
+            });
         }
 
         function createTrail(e) {
@@ -148,32 +115,15 @@
             setTimeout(() => p.remove(), 500);
         }
 
-        function checkFlash() {
-            score++; document.getElementById('score-display').innerText = `BLACK FLASHES: ${score}`;
-            document.body.style.filter = "invert(1)"; setTimeout(() => document.body.style.filter = "none", 150);
+        function playDV() {
+            const ov = document.getElementById('video-overlay'), vid = document.getElementById('domain-video'), aud = document.getElementById('bg-music');
+            aud.pause(); ov.style.display = 'block'; vid.play();
+            vid.onended = () => { ov.style.display = 'none'; aud.play(); };
         }
 
-        function nextSong() {
-            currentIdx = (currentIdx + 1) % songs.length;
-            charIdx = (charIdx + 1) % sorcerers.length;
-            const audio = document.getElementById('bg-music');
-            audio.src = songs[currentIdx].file; audio.play();
-            document.getElementById('track-label').innerText = "BGM: " + songs[currentIdx].name;
-            const char = sorcerers[charIdx];
-            document.getElementById('assigned-char').innerText = "DESIGNATION: " + char.name;
-            document.documentElement.style.setProperty('--aura-color', char.color);
-        }
-
-        function playDomainVideo() {
-            const overlay = document.getElementById('video-overlay'), video = document.getElementById('domain-video'), audio = document.getElementById('bg-music');
-            audio.pause(); overlay.style.display = 'block'; video.play();
-            video.onended = () => { overlay.style.display = 'none'; audio.play(); };
-        }
-
-        function updateTimer() {
-            const diff = targetDate - new Date().getTime();
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("timer").innerHTML = days + "d remaining until Deployment";
+        function updateClock() {
+            const diff = new Date("July 12, 2026") - new Date();
+            document.getElementById("timer").innerText = Math.floor(diff/(1000*60*60*24)) + " days until Unsealing";
         }
     </script>
 </body>
