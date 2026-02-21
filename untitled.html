@@ -20,16 +20,13 @@
             color: var(--text-color);
             font-family: 'Courier New', Courier, monospace;
             overflow-x: hidden;
+            transition: filter 1s ease;
         }
 
-        /* --- Domain Video Overlay --- */
-        #video-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 3000; display: none; background: black;
-        }
+        /* --- Overlays --- */
+        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; display: none; background: black; }
         #domain-video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- Intro Components --- */
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: black; z-index: 1000;
@@ -51,6 +48,14 @@
             min-height: 100vh;
         }
 
+        .countdown-container {
+            border: 2px solid var(--accent-red);
+            background: rgba(255, 0, 43, 0.1);
+            padding: 15px; text-align: center; margin-bottom: 20px;
+        }
+
+        #timer { font-size: 1.5rem; color: var(--terminal-green); font-weight: bold; }
+
         .profile-container { 
             text-align: center; border: 2px solid var(--aura-color); 
             padding: 20px; background: rgba(0,0,0,0.9); 
@@ -69,9 +74,7 @@
 </head>
 <body id="main-body">
 
-    <div id="video-overlay">
-        <video id="domain-video" src="domain_expansion.mp4"></video>
-    </div>
+    <div id="video-overlay"><video id="domain-video" src="domain_expansion.mp4"></video></div>
 
     <div id="intro-screen">
         <h2 style="margin-bottom: 30px;">AUTHENTICATE SORCERER</h2>
@@ -80,10 +83,14 @@
             <button class="music-btn" id="btn-not-interested" style="border: 2px solid var(--accent-red); font-size: 1rem;" onclick="selectWeak()">NOT INTERESTED</button>
         </div>
         <div id="weak-text">YOU WEAK</div>
-        <div id="win-text" style="display:none; color:white; font-size:4rem; font-weight:900; position:absolute;">NAH, I'D WIN</div>
     </div>
 
     <div id="main-content">
+        <div class="countdown-container">
+            <h3 style="margin:0; font-size:0.8rem;">🚨 NEXT DEPLOYMENT: JULY 12</h3>
+            <div id="timer">SYNCHRONIZING...</div>
+        </div>
+
         <div class="profile-container">
             <img src="Snapchat-1445956652.jpg" class="main-photo" alt="Tanish" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid var(--aura-color);">
             <h1>SORCERER: TANISH</h1>
@@ -96,14 +103,14 @@
         </div>
 
         <div class="mission-archive">
-            <div class="mission-card"><h4>Mission Archive 1</h4><img src="IMG_20260217_022703854.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 2</h4><img src="IMG-20251217-WA0377.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 3</h4><img src="IMG_20251203_230405358_HDR.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 4</h4><img src="IMG_20251018_212136105_HDR.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 5</h4><img src="IMG_20251001_213555617_HDR.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 6</h4><img src="IMG_20251001_213127285_HDR.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 7</h4><img src="IMG_20230629_235124_917.jpg" class="mission-photo"></div>
-            <div class="mission-card"><h4>Mission Archive 8</h4><img src="IMG_20250329_173025000_HDR.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 1</h4><img src="IMG_20260217_022703854.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 2</h4><img src="IMG-20251217-WA0377.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 3</h4><img src="IMG_20251203_230405358_HDR.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 4</h4><img src="IMG_20251018_212136105_HDR.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 5</h4><img src="IMG_20251001_213555617_HDR.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 6</h4><img src="IMG_20251001_213127285_HDR.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 7</h4><img src="IMG_20230629_235124_917.jpg" class="mission-photo"></div>
+            <div class="mission-card"><h4>Archive 8</h4><img src="IMG_20250329_173025000_HDR.jpg" class="mission-photo"></div>
         </div>
 
         <div class="music-player">
@@ -116,30 +123,22 @@
     <audio id="bg-music" loop src="Lady Gaga - Judas - GOJO VS SUKUNA.mp3"></audio>
 
     <script>
+        const targetDate = new Date("July 12, 2026 00:00:00").getTime();
         const songs = [
             { name: "JUDAS (GOJO VS SUKUNA)", file: "Lady Gaga - Judas - GOJO VS SUKUNA.mp3" },
             { name: "AIZO", file: "01. AIZO 「www.kazvampires.com」 (online-audio-converter.com).mp3" },
             { name: "TUCA DONKA", file: "TUCA DONKA - CURSEDEVIL, DJ FKU, Skorde.mp3" },
-            { name: "SPECIALZ", file: "SPECIALZ Song of King Gnu ‧ 2023.mp3" }
+            { name: "SPECIALZ", file: "SPECIALZ Song of King Gnu . 2023.mp3" }
         ];
 
-        const sorcerers = [
-            { name: "SATORU GOJO", color: "#9d4edd" },
-            { name: "RYOMEN SUKUNA", color: "#ff002b" },
-            { name: "TOJI FUSHIGURO", color: "#444444" }
-        ];
-
-        let currentIdx = 0;
-        let charIdx = 0;
-        let scale = 1.0;
+        const sorcerers = [{ name: "SATORU GOJO", color: "#9d4edd" }, { name: "RYOMEN SUKUNA", color: "#ff002b" }, { name: "TOJI FUSHIGURO", color: "#444444" }];
+        let currentIdx = 0, charIdx = 0, scale = 1.0;
 
         function selectWinner() {
-            document.getElementById('win-text').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('intro-screen').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                document.getElementById('bg-music').play();
-            }, 1000);
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('bg-music').play();
+            startCountdown();
         }
 
         function selectWeak() {
@@ -148,13 +147,21 @@
             document.getElementById('weak-text').style.display = 'block';
         }
 
+        function startCountdown() {
+            setInterval(function() {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById("timer").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+            }, 1000);
+        }
+
         function playDomainVideo() {
-            const overlay = document.getElementById('video-overlay');
-            const video = document.getElementById('domain-video');
-            const audio = document.getElementById('bg-music');
-            audio.pause();
-            overlay.style.display = 'block';
-            video.play();
+            const overlay = document.getElementById('video-overlay'), video = document.getElementById('domain-video'), audio = document.getElementById('bg-music');
+            audio.pause(); overlay.style.display = 'block'; video.play();
             video.onended = () => { overlay.style.display = 'none'; audio.play(); };
         }
 
@@ -171,8 +178,7 @@
         }
 
         function executeCursedSpeech(cmd) {
-            const command = cmd.toLowerCase().trim();
-            if (command === "sleep") {
+            if (cmd.toLowerCase().trim() === "sleep") {
                 document.body.style.filter = "brightness(0)";
                 setTimeout(() => { document.body.style.filter = "brightness(1)"; }, 4000);
             }
