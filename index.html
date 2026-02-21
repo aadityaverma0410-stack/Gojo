@@ -3,117 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gojo Archive | Domain Expansion</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <title>Jujutsu High | Gojo Archive</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
 
     <style>
-        :root { --jjk-purple: #a855f7; --jjk-blue: #3b82f6; --black-flash: #ff0033; }
-        body { background: #000; color: #fff; font-family: 'Courier New', monospace; overflow-x: hidden; transition: 0.3s; }
+        :root { --bg-color: #050505; --text-color: #e0e0e0; --accent-purple: #9d4edd; --accent-red: #ff002b; --terminal-green: #00ff41; --gojo-blue: #00d4ff; --black-flash: #ff003c; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-color); color: var(--text-color); font-family: 'Courier New', monospace; overflow-x: hidden; transition: 0.2s; }
         
-        /* Cinematic UI */
-        .sorcerer-header { border-bottom: 2px solid var(--jjk-purple); padding: 20px; text-shadow: 0 0 10px var(--jjk-purple); }
-        .controls { display: flex; gap: 10px; justify-content: center; padding: 20px; flex-wrap: wrap; }
+        /* Overlays */
+        #video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: none; background: black; }
+        #domain-video { width: 100%; height: 100%; object-fit: cover; }
+        #six-eyes-trail { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; }
+        .energy-particle { position: absolute; width: 10px; height: 10px; background: var(--gojo-blue); border-radius: 50%; box-shadow: 0 0 15px var(--gojo-blue); transition: transform 0.4s ease, opacity 0.4s ease; }
+
+        /* Main Content with Background Restoration */
+        #main-content { display: none; padding: 15px 15px 280px 15px; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('1000101960.jpg'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; }
+        .module-box { border: 1px solid var(--accent-purple); padding: 15px; margin: 20px 0; background: rgba(0,0,0,0.9); text-align: center; border-radius: 4px; }
         
-        button { 
-            background: transparent; border: 1px solid #fff; color: #fff; padding: 10px 15px; 
-            cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.3s;
-        }
-        button:hover { background: #fff; color: #000; box-shadow: 0 0 15px #fff; }
+        /* Grid Styles */
+        .mission-archive, #community-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .mission-photo, .community-photo { width: 100%; border-radius: 2px; border: 1px solid var(--accent-purple); aspect-ratio: 1/1; object-fit: cover; transition: 0.5s; filter: blur(5px) grayscale(1); }
+        .mission-photo:hover, .community-photo:hover { filter: blur(0) grayscale(0); border-color: var(--gojo-blue); }
 
-        /* Video Overlay */
-        #videoOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; background: #000; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        /* Controls */
+        .music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(5,5,5,0.98); border-top: 2px solid var(--accent-purple); padding: 20px 0; text-align: center; z-index: 100; box-shadow: 0 -10px 30px rgba(157, 78, 221, 0.2); }
+        .music-btn { background: transparent; border: 1px solid var(--accent-purple); color: var(--accent-purple); padding: 10px 15px; margin: 5px; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; font-weight: bold; transition: 0.3s; }
+        .music-btn:hover { background: var(--accent-purple); color: white; box-shadow: 0 0 15px var(--accent-purple); }
 
-        /* Black Flash Animation */
-        @keyframes blackFlash {
-            0% { background: #000; }
-            20% { background: var(--black-flash); transform: scale(1.05) rotate(1deg); }
-            40% { background: #000; transform: scale(1) rotate(-1deg); }
-            100% { background: #000; }
+        /* Animations */
+        @keyframes blackFlashShake {
+            0% { transform: translate(0,0); background: var(--black-flash); }
+            25% { transform: translate(10px, -10px); }
+            50% { transform: translate(-10px, 10px); background: #000; }
+            75% { transform: translate(10px, 10px); }
+            100% { transform: translate(0,0); }
         }
-        .black-flash-active { animation: blackFlash 0.3s ease-in-out 2; }
+        .shake-active { animation: blackFlashShake 0.1s linear infinite; }
     </style>
 </head>
-<body id="mainBody">
+<body onmousemove="createTrail(event)" ontouchmove="createTrail(event.touches[0])">
 
-    <div class="sorcerer-header">
-        <h1>🧿 GOJO ARCHIVE</h1>
-        <p>SORCERER: TANISH | 140 days until Unsealing</p>
+    <div id="video-overlay"><video id="domain-video" src="domain_expansion.mp4"></video></div>
+    <div id="six-eyes-trail"></div>
+
+    <div id="intro-screen" style="position:fixed;width:100%;height:100%;background:black;z-index:11000;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+        <button class="music-btn" style="font-size:1.5rem; border-color:var(--gojo-blue); color:var(--gojo-blue);" onclick="startDomain()">INTERESTED</button>
+        <button class="music-btn" style="margin-top:20px; font-size:0.8rem; border-color:gray; color:gray;" onclick="notInterested()">NOT INTERESTED</button>
     </div>
 
-    <div class="controls">
-        <button onclick="window.location.reload()">NOT INTERESTED 🚫</button>
-        <button onclick="nextTrack()">NEXT TRACK 🎵</button>
-        <button onclick="playDomain()">GOJO VS SUKUNA 🤞</button>
-        <button onclick="triggerBlackFlash()">BLACK FLASH ⚡</button>
-    </div>
-
-    <div id="videoOverlay">
-        <video id="domainVideo">
-            <source src="domain_expansion.mp4" type="video/mp4">
-        </video>
-    </div>
-
-    <div class="mission-archive-grid" id="gallery">
+    <div id="main-content">
+        <div class="module-box">
+            <img src="Snapchat-1445956652.jpg" style="width:120px;height:120px;border-radius:50%;border:3px solid var(--accent-purple); object-fit: cover;">
+            <h1>SORCERER: TANISH</h1>
+            <p id="timer" style="color:var(--terminal-green); font-weight:bold;">SYNCHRONIZING...</p>
         </div>
 
+        <div class="module-box" style="border-color: var(--terminal-green);">
+            <h3>INUMAKI TECHNIQUE 🗣️</h3>
+            <input type="text" id="cursed-input" placeholder="Speak command..." style="background:black; border:1px solid var(--terminal-green); color:var(--terminal-green); padding:8px; width:80%; text-align:center;">
+            <button class="music-btn" style="border-color:var(--terminal-green); color:var(--terminal-green);" onclick="executeCursedSpeech()">RELEASE</button>
+        </div>
+
+        <div class="module-box">
+            <h3>MISSION ARCHIVE</h3>
+            <div class="mission-archive">
+                <img src="IMG_20251217_161226926.jpg" class="mission-photo">
+                <img src="IMG_20251018_174718968.jpg" class="mission-photo">
+                <img src="IMG-20251018-WA0075.jpg" class="mission-photo">
+                <img src="IMG-20251018-WA0061.jpg" class="mission-photo">
+                <img src="IMG_20251217_154353312_HDR.jpg" class="mission-photo">
+                <img src="IMG-20251217-WA0338.jpg" class="mission-photo">
+                <img src="IMG-20251218-WA0395.jpg" class="mission-photo">
+                <img src="IMG_20260214_124036_873.jpg" class="mission-photo">
+                <img src="IMG_20260217_114544_290.jpg" class="mission-photo">
+                <img src="IMG-20260216-WA0043.jpg" class="mission-photo">
+                <img src="IMG-20260217-WA0054.jpg" class="mission-photo">
+            </div>
+        </div>
+
+        <div class="module-box" style="border-color: var(--gojo-blue);">
+            <h3>COMMUNITY MEMORIES 🌀</h3>
+            <input type="file" id="up" style="display:none;" onchange="upload(this)">
+            <button class="music-btn" style="color: var(--gojo-blue); border-color: var(--gojo-blue);" onclick="document.getElementById('up').click()">UPLOAD MEMORY</button>
+            <div id="upload-status" style="font-size:0.6rem;margin-top:10px;"></div>
+            <div id="community-grid"></div>
+        </div>
+
+        <div class="music-player">
+            <button class="music-btn" onclick="triggerBlackFlash()">BLACK FLASH ⚡</button>
+            <button class="music-btn" onclick="playDV()">GOJO VS SUKUNA 🤞</button>
+            <button class="music-btn" onclick="nextTrack()">NEXT TRACK ⏩</button>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop src="Lady Gaga - Judas - GOJO VS SUKUNA.mp3"></audio>
+
     <script>
-        // --- 1. CONFIG (Paste your real keys here!) ---
+        // FIREBASE SETUP
         const firebaseConfig = {
-            apiKey: "YOUR_KEY",
+            apiKey: "AIzaSyBxJd_atjhj9OqZCqjvWe_35EJH",
+            authDomain: "gojo-archive.firebaseapp.com",
             projectId: "gojo-archive",
-            storageBucket: "gojo-archive.appspot.com",
-            appId: "YOUR_APP_ID"
+            storageBucket: "gojo-archive.firebasestorage.app",
+            messagingSenderId: "83853315706",
+            appId: "1:83853315706:web:d881046437197a5c6d36e2"
         };
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const storage = firebase.storage(), db = firebase.firestore(), auth = firebase.auth();
 
-        // --- 2. AUDIO SYSTEM ---
-        const playlist = ["TUCA DONKA - CURSEDEVIL, DJ FKU, Skorde.mp3", "Lady Gaga - Judas - GOJO VS SUKUNA.mp3", "SPECIALZ Song of King Gnu ‧ 2023.mp3", "daddy's home.mp3"]; // Update with your actual files!
-        let currentTrack = 0;
-        let bgMusic = new Audio(playlist[0]);
-
-        function nextTrack() {
-            bgMusic.pause();
-            currentTrack = (currentTrack + 1) % playlist.length;
-            bgMusic = new Audio(playlist[currentTrack]);
-            bgMusic.play();
+        // 1. NOT INTERESTED
+        function notInterested() {
+            document.body.innerHTML = "<div style='background:black;height:100vh;display:flex;justify-content:center;align-items:center;color:white;'><h2>Good night, Gojo Satoru.</h2></div>";
         }
 
-        // --- 3. DOMAIN EXPANSION ---
-        function playDomain() {
-            const overlay = document.getElementById("videoOverlay");
-            const video = document.getElementById("domainVideo");
-            overlay.style.display = "block";
-            video.play();
-            video.onended = () => { overlay.style.display = "none"; };
-        }
-
-        // --- 4. BLACK FLASH ---
+        // 2. BLACK FLASH INTERACTION
         function triggerBlackFlash() {
-            const body = document.getElementById("mainBody");
-            body.classList.add("black-flash-active");
-            setTimeout(() => body.classList.remove("black-flash-active"), 600);
-            // Optional: Play a hit sound
-            new Audio('hit_sound.mp3').play();
+            const chance = Math.floor(Math.random() * 5); // 1 in 5 chance
+            if (chance === 1) {
+                document.body.classList.add('shake-active');
+                setTimeout(() => document.body.classList.remove('shake-active'), 800);
+                console.log("CRITICAL HIT: BLACK FLASH!");
+            } else {
+                alert("Failed to spark. Try again.");
+            }
         }
 
-        // --- 5. AUTH & REAL-TIME GALLERY ---
-        auth.onAuthStateChanged(user => { if(!user) auth.signInAnonymously(); });
+        // 3. CURSED SPEECH
+        function executeCursedSpeech() {
+            const cmd = document.getElementById('cursed-input').value.toLowerCase();
+            if(cmd.includes("sleep")) { document.body.style.opacity = "0.1"; }
+            else if(cmd.includes("don't move")) { alert("Archive frozen."); }
+            else if(cmd.includes("die")) { notInterested(); }
+            else { alert("Command too weak."); }
+        }
 
-        db.collection("memories").orderBy("time", "desc").onSnapshot(snap => {
-            const gallery = document.getElementById("gallery");
-            gallery.innerHTML = "";
+        // --- CORE FUNCTIONS (RESTORED) ---
+        function startDomain() { 
+            auth.signInAnonymously(); // Ensure upload works
+            document.getElementById('intro-screen').style.display='none'; 
+            document.getElementById('main-content').style.display='block'; 
+            document.getElementById('bg-music').play(); 
+            loadMemories(); 
+            setInterval(updateClock, 1000); 
+        }
+
+        async function upload(input) {
+            const file = input.files[0], status = document.getElementById('upload-status');
+            if(!file) return;
+            status.innerText = "SEALING MEMORY...";
+            const ref = storage.ref(`memories/${Date.now()}`);
+            await ref.put(file);
+            const url = await ref.getDownloadURL();
+            await db.collection("memories").add({url: url, time: Date.now()});
+            status.innerText = "SUCCESS! ✅"; loadMemories();
+        }
+
+        async function loadMemories() {
+            const grid = document.getElementById('community-grid'); grid.innerHTML = "";
+            const snap = await db.collection("memories").orderBy("time", "desc").get();
             snap.forEach(doc => {
-                const data = doc.data();
-                gallery.innerHTML += `<img src="${data.url}" style="width:200px; margin:10px; filter:blur(5px);" onclick="this.style.filter='none'">`;
+                const img = document.createElement('img');
+                img.src = doc.data().url; img.className = "community-photo";
+                grid.appendChild(img);
             });
-        });
+        }
+
+        function createTrail(e) {
+            const p = document.createElement('div'); p.className = 'energy-particle';
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.getElementById('six-eyes-trail').appendChild(p);
+            setTimeout(() => { p.style.transform = 'scale(0)'; p.style.opacity = '0'; }, 50);
+            setTimeout(() => p.remove(), 500);
+        }
+
+        function playDV() {
+            const ov = document.getElementById('video-overlay'), vid = document.getElementById('domain-video'), aud = document.getElementById('bg-music');
+            aud.pause(); ov.style.display = 'block'; vid.play();
+            vid.onended = () => { ov.style.display = 'none'; aud.play(); };
+        }
+
+        function updateClock() {
+            const diff = new Date("July 12, 2026") - new Date();
+            document.getElementById("timer").innerText = Math.floor(diff/(1000*60*60*24)) + " days until Unsealing";
+        }
     </script>
 </body>
 </html>
